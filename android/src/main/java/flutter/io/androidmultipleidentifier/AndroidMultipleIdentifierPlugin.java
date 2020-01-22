@@ -63,19 +63,21 @@ public class AndroidMultipleIdentifierPlugin
     Log.i(TAG, "ATTEMPTING TO getSerial: ");
     String serial = "";
 
-    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      serial = Build.getSerial();
-      if (serial == null) {
-        serial = "returned null";
-      }
-    } else {
-      serial = Build.SERIAL;
-      if (serial == null) {
-        serial = "returned null";
-      }
-    }
-
-    return serial;
+    try {
+      Class<?> c = Class.forName("android.os.SystemProperties");
+      Method get = c.getMethod("get", String.class);
+      // (?) Lenovo Tab (https://stackoverflow.com/a/34819027/1276306)
+      serial = (String) get.invoke(c, "gsm.sn1");
+      if (serial.equals(""))  serial = (String) get.invoke(c, "ril.serialnumber");
+      if (serial.equals("")) serial = (String) get.invoke(c, "ro.serialno");
+      if (serial.equals("")) serial = (String) get.invoke(c, "sys.serialnumber");
+      if (serial.equals("") && android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)  serial = Build.getSerial();
+      if (serial.equals("")) serial = Build.SERIAL;
+      if (serial.equals("")) serial = null;
+      } catch (Exception e) {
+        e.printStackTrace();    
+      }   
+      return serial;
   }
 
   private String getAndroidID(Context c) {
