@@ -11,6 +11,8 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.Map;
 
